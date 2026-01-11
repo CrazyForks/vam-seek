@@ -309,6 +309,8 @@ Commercial use requires a paid license. Contact: info@haasiy.jp
 
 ## Credits
 
-Based on VAM Desktop application algorithms:
+Based on [VAM Desktop](https://github.com/unhaya/VAM-original) application algorithms:
 - `vam5.70/utils/video_utils.py` - calculate_x_continuous_timestamp
 - `vam5.70/gui/preview/core/grid_calculator.py` - GridCalculator
+
+> **Note:** This is the original codebase—a 100k-line functional application built with raw effort. It's messy, but it was the foundation for VAM-Seek's 15KB condensation.
