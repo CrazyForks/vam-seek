@@ -549,8 +549,10 @@
             let row = Math.floor(continuousCellIndex / this.columns);
             row = Math.max(0, Math.min(row, this.state.rows - 1));
 
+            // positionInRow is the column index (0 to columns-1 range, can be fractional)
             const positionInRow = continuousCellIndex - (row * this.columns);
-            const x = (positionInRow / this.columns) * this.state.gridWidth;
+            // Convert to pixel position: column_index * cellWidth
+            const x = positionInRow * this.state.cellWidth;
             const y = (row + 0.5) * this.state.cellHeight;
 
             return {
