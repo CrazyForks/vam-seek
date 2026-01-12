@@ -222,9 +222,9 @@
             const cellIndex = row * this.columns + col;
             if (cellIndex >= this.state.totalCells) return;
 
-            // ③ Move marker to cell center (both X and Y)
-            const x = (col + 0.5) * this.state.cellWidth;
-            const y = (row + 0.5) * this.state.cellHeight;
+            // Move marker to cell's left-top corner
+            const x = col * this.state.cellWidth;
+            const y = row * this.state.cellHeight;
             this._moveMarkerTo(x, y, true);
 
             const time = cellIndex * this.secondsPerCell;
@@ -486,11 +486,11 @@
 
         _initMarker() {
             this.marker.style.display = 'block';
-            // ③ Initialize marker at the center of first cell
-            this.state.markerX = this.state.cellWidth * 0.5;
-            this.state.markerY = this.state.cellHeight * 0.5;
-            this.state.targetX = this.state.markerX;
-            this.state.targetY = this.state.markerY;
+            // Initialize marker at the left-top corner of first cell
+            this.state.markerX = 0;
+            this.state.markerY = 0;
+            this.state.targetX = 0;
+            this.state.targetY = 0;
             this._updateMarkerPosition();
         }
 
@@ -538,11 +538,8 @@
          */
         _calculatePositionFromTime(time) {
             if (this.state.totalCells === 0 || this.secondsPerCell <= 0) {
-                // ③ Fallback: return center of first cell
-                return {
-                    x: this.state.cellWidth * 0.5,
-                    y: this.state.cellHeight * 0.5
-                };
+                // Fallback: return left-top corner of first cell
+                return { x: 0, y: 0 };
             }
 
             const continuousCellIndex = time / this.secondsPerCell;
@@ -551,9 +548,9 @@
 
             // positionInRow is the column index (0 to columns-1 range, can be fractional)
             const positionInRow = continuousCellIndex - (row * this.columns);
-            // Convert to pixel position: (column_index + 0.5) * cellWidth to center marker in cell
-            const x = (positionInRow + 0.5) * this.state.cellWidth;
-            const y = (row + 0.5) * this.state.cellHeight;
+            // Convert to pixel position: column_index * cellWidth (left edge of cell)
+            const x = positionInRow * this.state.cellWidth;
+            const y = row * this.state.cellHeight;
 
             return {
                 x: Math.max(0, Math.min(x, this.state.gridWidth)),
