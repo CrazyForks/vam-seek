@@ -135,8 +135,7 @@
                 isAnimating: false,
                 animationId: null,
                 extractorVideo: null,
-                isExtracting: false,
-                aborted: false,
+                taskId: 0,  // Task-based abort management (like demo)
                 lastScrollTime: 0,
                 scrollAnimationId: null
             };
@@ -248,7 +247,8 @@
         rebuild() {
             if (!this.video.duration) return;
 
-            this.state.aborted = true;
+            // Abort any ongoing extraction (task-based, like demo)
+            this.state.taskId = (this.state.taskId || 0) + 1;
 
             // Multi-video cache: don't clear, just use cached frames if available
 
@@ -257,10 +257,13 @@
             this._updateGridDimensions();
             this._initMarker();
 
-            // ② Reset scroll position to top
+            // Reset scroll position to top
             this.container.scrollTop = 0;
 
-            this._extractAllFrames();
+            // Start extraction in next frame (like demo's requestAnimationFrame)
+            requestAnimationFrame(() => {
+                this._extractAllFrames();
+            });
         }
 
         /**
@@ -314,7 +317,8 @@
          * Destroy instance
          */
         destroy() {
-            this.state.aborted = true;
+            // Invalidate current task to stop extraction
+            this.state.taskId++;
             if (this.state.animationId) {
                 cancelAnimationFrame(this.state.animationId);
             }
@@ -322,7 +326,10 @@
                 cancelAnimationFrame(this.state.scrollAnimationId);
             }
             if (this.state.extractorVideo) {
+                this.state.extractorVideo.pause();
+                this.state.extractorVideo.src = '';
                 this.state.extractorVideo.remove();
+                this.state.extractorVideo = null;
             }
             // Don't clear global cache on destroy
             this.grid.remove();
@@ -449,20 +456,39 @@
         // ==========================================
 
         async _extractAllFrames() {
-            if (this.state.isExtracting) return;
+            // Task-based abort management (like demo)
+            const myTaskId = this.state.taskId;
+            const targetVideoSrc = this.video.src;
 
-            this.state.isExtracting = true;
-            this.state.aborted = false;
+            // Helper to check if this task is still valid
+            const isTaskValid = () => this.state.taskId === myTaskId && this.video.src === targetVideoSrc;
 
             try {
-                // Create extractor video
+                // Cleanup previous extractor video
                 if (this.state.extractorVideo) {
+                    this.state.extractorVideo.pause();
+                    this.state.extractorVideo.src = '';
                     this.state.extractorVideo.remove();
+                    this.state.extractorVideo = null;
                 }
+
+                // Check if task was cancelled
+                if (!isTaskValid()) return;
+
                 this.state.extractorVideo = await this._createExtractorVideo();
 
+                // Check again after async operation
+                if (!isTaskValid() || !this.state.extractorVideo) {
+                    if (this.state.extractorVideo) {
+                        this.state.extractorVideo.remove();
+                        this.state.extractorVideo = null;
+                    }
+                    return;
+                }
+
                 for (let i = 0; i < this.state.totalCells; i++) {
-                    if (this.state.aborted) break;
+                    // Check if task was cancelled (cache is preserved)
+                    if (!isTaskValid()) break;
 
                     // Extract thumbnail from center of cell (0.5 offset)
                     const timestamp = (i + 0.5) * this.secondsPerCell;
@@ -476,7 +502,11 @@
                     }
 
                     const frame = await this._extractFrame(timestamp);
-                    if (frame && !this.state.aborted) {
+
+                    // Check again after async operation
+                    if (!isTaskValid()) break;
+
+                    if (frame) {
                         this._displayFrame(cell, frame);
                     }
 
@@ -484,8 +514,6 @@
                 }
             } catch (e) {
                 // Frame extraction error - silently fail
-            } finally {
-                this.state.isExtracting = false;
             }
         }
 
