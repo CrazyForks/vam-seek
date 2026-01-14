@@ -2,7 +2,7 @@
 (Video Archive Manager)
 
 [![License: Dual](https://img.shields.io/badge/License-Dual%20(Free%20%2F%20Commercial)-blue.svg)](LICENSE)
-[![Size](https://img.shields.io/badge/Size-~15KB%20(minified)-green.svg)](dist/vam-seek.js)
+[![Size](https://img.shields.io/badge/Size-~36KB%20(with%20Multi--Video%20Cache)-green.svg)](dist/vam-seek.js)
 [![No Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen.svg)](#)
 [![Browser](https://img.shields.io/badge/Works%20in-All%20Modern%20Browsers-orange.svg)](#)
 
@@ -22,7 +22,7 @@ Navigate videos visually with a thumbnail grid instead of a 1D seek bar. Client-
 |---------------------|----------|
 | 1D timeline, trial-and-error | 2D grid, instant visual navigation |
 | Server-generated thumbnails | Client-side canvas extraction |
-| Heavy infrastructure | Zero server load, ~15KB JS |
+| Heavy infrastructure | Zero server load, ~36KB JS |
 | Complex integration | One-line setup |
 
 ## Quick Start
@@ -53,6 +53,32 @@ That's it. See [docs/INTEGRATION.md](docs/INTEGRATION.md) for full documentation
 - **Smooth marker animation** - 60fps with requestAnimationFrame
 - **VAM algorithm** - Precise timestamp calculation
 - **Framework support** - React, Vue, vanilla JS examples included
+
+## Ultra-Lightweight, Yet Powerful
+
+VAM Seek is now **~36KB** (minified).
+
+Wait, didn't I say 15KB before? Yes, I did. But I chose to **trade those 21KB for a significantly better user experience**. Here is why:
+
+### 1. Multi-Video LRU Cache (New!)
+
+I implemented a sophisticated Multi-Video LRU Cache. VAM Seek now "remembers" the thumbnail grids for up to 3 different videos simultaneously.
+
+**The Magic:** When a user switches back to a previously viewed video, the 2D grid appears instantly. No re-extraction, no waiting.
+
+**Philosophy:** To be a "Silent Assistant," the tool must be faster than the user's thought. This cache makes that possible.
+
+### 2. Reliability & Stability
+
+I've crushed several bugs discovered during the initial 10,000+ access surge. The code is now more robust, handling various video formats and edge cases more gracefully.
+
+### 3. Smooth "VAM" Physics
+
+The marker movement and auto-scrolling now use a more refined easing algorithm to ensure that 60fps "buttery smooth" feel.
+
+---
+
+Even at 36KB, it remains **one of the lightest and most efficient video navigation libraries in the world**. It's about finding the perfect balance between "small code" and "big experience."
 
 ## Privacy & Architecture
 

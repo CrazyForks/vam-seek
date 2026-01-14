@@ -137,6 +137,7 @@
                 extractorVideo: null,
                 currentTaskId: 0,  // Task counter (always increments)
                 activeTaskId: null,  // Currently valid task ID (null = no active task)
+                currentVideoUrl: null,  // Current video URL (like demo's STATE.currentVideoUrl)
                 lastScrollTime: 0,
                 scrollAnimationId: null
             };
@@ -251,7 +252,8 @@
             // Abort any ongoing extraction (like demo's generateThumbnails)
             this.state.activeTaskId = null;
 
-            // Multi-video cache: don't clear, just use cached frames if available
+            // Store current video URL (like demo's STATE.currentVideoUrl)
+            this.state.currentVideoUrl = this.video.src;
 
             this._calculateGridSize();
             this._renderGrid();
@@ -459,23 +461,18 @@
         // ==========================================
 
         async _extractAllFrames() {
-            if (!this.video.src) return;
+            if (!this.state.currentVideoUrl) return;
 
-            // Task-based abort management (like demo's extractAllFrames)
+            // Task-based abort management (exactly like demo's extractAllFrames)
             const taskId = ++this.state.currentTaskId;
             this.state.activeTaskId = taskId;
-            const targetVideoSrc = this.video.src;
+            const targetVideoUrl = this.state.currentVideoUrl;
 
-            // Helper to check if this task is still valid (like demo)
-            const isTaskValid = () => {
-                return this.state.activeTaskId === taskId && this.video.src === targetVideoSrc;
-            };
-
-            // Local variable for this task's extractor video
-            let extractorVideo = null;
+            // Helper to check if this task is still valid (exactly like demo)
+            const isTaskValid = () => this.state.activeTaskId === taskId && this.state.currentVideoUrl === targetVideoUrl;
 
             try {
-                // Cleanup previous extractor video (if any from previous task)
+                // Cleanup previous extractor video
                 if (this.state.extractorVideo) {
                     this.state.extractorVideo.pause();
                     this.state.extractorVideo.src = '';
@@ -486,21 +483,17 @@
                 // Check if task was cancelled
                 if (!isTaskValid()) return;
 
-                extractorVideo = await this._createExtractorVideo(targetVideoSrc);
+                // Create extractor video (assign directly to state like demo)
+                this.state.extractorVideo = await this._createExtractorVideo(targetVideoUrl);
 
-                // Check again after async operation - task may have been cancelled
-                if (!isTaskValid()) {
-                    // Clean up our local video since we're aborting
-                    if (extractorVideo) {
-                        extractorVideo.pause();
-                        extractorVideo.src = '';
-                        extractorVideo.remove();
+                // Check again after async operation (same pattern as demo)
+                if (!isTaskValid() || !this.state.extractorVideo) {
+                    if (this.state.extractorVideo) {
+                        this.state.extractorVideo.remove();
+                        this.state.extractorVideo = null;
                     }
                     return;
                 }
-
-                // Only set to state if task is still valid
-                this.state.extractorVideo = extractorVideo;
 
                 for (let i = 0; i < this.state.totalCells; i++) {
                     // Check if task was cancelled (cache is preserved)
@@ -514,19 +507,19 @@
                     if (!cell) continue;
 
                     // Check cache
-                    const cached = this.frameCache.get(targetVideoSrc, timestamp);
+                    const cached = this.frameCache.get(targetVideoUrl, timestamp);
                     if (cached) {
                         this._displayFrame(cell, cached);
                         continue;
                     }
 
-                    const frame = await this._extractFrame(extractorVideo, timestamp);
+                    const frame = await this._extractFrame(this.state.extractorVideo, timestamp);
 
                     // Check again after async operation
                     if (!isTaskValid()) break;
 
                     if (frame) {
-                        this.frameCache.put(targetVideoSrc, timestamp, frame);
+                        this.frameCache.put(targetVideoUrl, timestamp, frame);
                         this._displayFrame(cell, frame);
                     }
 
