@@ -457,13 +457,12 @@
         // ==========================================
 
         async _extractAllFrames() {
+            if (!this.video.src) return;
+
             // Task-based abort management (like demo's extractAllFrames)
             const taskId = ++this.state.currentTaskId;
             this.state.activeTaskId = taskId;
             const targetVideoSrc = this.video.src;
-            // Capture config at task start (like demo's CONFIG)
-            const taskSecondsPerCell = this.secondsPerCell;
-            const taskTotalCells = this.state.totalCells;
 
             // Helper to check if this task is still valid (like demo)
             const isTaskValid = () => this.state.activeTaskId === taskId && this.video.src === targetVideoSrc;
@@ -480,45 +479,40 @@
                 // Check if task was cancelled
                 if (!isTaskValid()) return;
 
-                const newExtractorVideo = await this._createExtractorVideo();
+                this.state.extractorVideo = await this._createExtractorVideo(targetVideoSrc);
 
                 // Check again after async operation
-                if (!isTaskValid()) {
-                    // Task was cancelled while loading - cleanup the video we just created
-                    if (newExtractorVideo) {
-                        newExtractorVideo.pause();
-                        newExtractorVideo.src = '';
-                        newExtractorVideo.remove();
+                if (!isTaskValid() || !this.state.extractorVideo) {
+                    if (this.state.extractorVideo) {
+                        this.state.extractorVideo.remove();
+                        this.state.extractorVideo = null;
                     }
                     return;
                 }
 
-                this.state.extractorVideo = newExtractorVideo;
-                if (!this.state.extractorVideo) {
-                    return;
-                }
-
-                for (let i = 0; i < taskTotalCells; i++) {
+                for (let i = 0; i < this.state.totalCells; i++) {
                     // Check if task was cancelled (cache is preserved)
                     if (!isTaskValid()) break;
 
                     // Extract thumbnail from center of cell (0.5 offset)
-                    const timestamp = (i + 0.5) * taskSecondsPerCell;
+                    const timestamp = (i + 0.5) * this.secondsPerCell;
                     const cell = this.grid.children[i];
                     if (!cell) continue;
 
-                    const cached = this.frameCache.get(this.video.src, timestamp);
+                    // Check cache
+                    const cached = this.frameCache.get(targetVideoSrc, timestamp);
                     if (cached) {
                         this._displayFrame(cell, cached);
                         continue;
                     }
 
-                    const frame = await this._extractFrame(timestamp);
+                    const frame = await this._extractFrame(this.state.extractorVideo, timestamp);
 
                     // Check again after async operation
                     if (!isTaskValid()) break;
 
                     if (frame) {
+                        this.frameCache.put(targetVideoSrc, timestamp, frame);
                         this._displayFrame(cell, frame);
                     }
 
@@ -529,7 +523,7 @@
             }
         }
 
-        _createExtractorVideo() {
+        _createExtractorVideo(url) {
             return new Promise((resolve, reject) => {
                 const video = document.createElement('video');
                 video.style.display = 'none';
@@ -537,7 +531,6 @@
                 video.playsInline = true;
                 video.preload = 'auto';
 
-                const url = this.video.src;
                 // Set crossOrigin only for external URLs (same as demo)
                 if (url.startsWith('http') && !url.startsWith(location.origin)) {
                     video.crossOrigin = 'anonymous';
@@ -570,53 +563,34 @@
             });
         }
 
-        async _extractFrame(timestamp) {
-            const video = this.state.extractorVideo;
-            if (!video) return null;
-
+        _extractFrame(video, timestamp) {
             return new Promise((resolve) => {
-                const cached = this.frameCache.get(this.video.src, timestamp);
-                if (cached) {
-                    resolve(cached);
-                    return;
-                }
-
-                // Optimization: if already at position, capture immediately
+                // Already at the requested position
                 if (Math.abs(video.currentTime - timestamp) < 0.1 && video.readyState >= 2) {
-                    const frame = this._captureFrame(video);
-                    if (frame) {
-                        this.frameCache.put(this.video.src, timestamp, frame);
-                    }
-                    resolve(frame);
+                    resolve(this._captureFrame(video));
                     return;
                 }
 
                 let resolved = false;
+
                 const onSeeked = () => {
                     if (resolved) return;
                     resolved = true;
                     video.removeEventListener('seeked', onSeeked);
-                    // Wait 50ms after seeked for stable frame (matches demo)
-                    setTimeout(() => {
-                        const frame = this._captureFrame(video);
-                        if (frame) {
-                            this.frameCache.put(this.video.src, timestamp, frame);
-                        }
-                        resolve(frame);
-                    }, 50);
+                    // Wait for frame to render
+                    setTimeout(() => resolve(this._captureFrame(video)), 50);
                 };
 
                 video.addEventListener('seeked', onSeeked);
-                // Clip timestamp to avoid end-of-video issues (matches demo)
                 video.currentTime = Math.min(timestamp, video.duration - 0.1);
 
+                // Timeout: 5 seconds
                 setTimeout(() => {
                     if (resolved) return;
                     resolved = true;
                     video.removeEventListener('seeked', onSeeked);
-                    // Fallback: try to capture anyway
-                    const frame = this._captureFrame(video);
-                    resolve(frame);
+                    // Try to capture anyway
+                    resolve(this._captureFrame(video));
                 }, 5000);
             });
         }
