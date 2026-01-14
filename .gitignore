@@ -48,3 +48,6 @@ html/
 # Private documents
 特許ドキュメント.txt
 docs/qiita-article.md
+
+# Local deployment (not for GitHub)
+deploy/lolipop/
