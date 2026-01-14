@@ -449,6 +449,21 @@
                 this.state.cellHeight = rect.height / this.state.rows;
                 this.state.gridGap = 2;
             }
+
+            // Debug: verify grid dimensions and gap
+            const gridStyle = getComputedStyle(this.grid);
+            const expectedHeight = this.state.rows * this.state.cellHeight + (this.state.rows - 1) * this.state.gridGap;
+            console.log('VAMSeek dimensions:', {
+                rows: this.state.rows,
+                cellHeight: this.state.cellHeight,
+                gridGap: this.state.gridGap,
+                gridGapRaw: gridStyle.gap,
+                rowGap: gridStyle.rowGap,
+                columnGap: gridStyle.columnGap,
+                gridHeight: this.state.gridHeight,
+                expectedHeight: expectedHeight,
+                diff: this.state.gridHeight - expectedHeight
+            });
         }
 
         // ==========================================
@@ -773,7 +788,7 @@
 
         /**
          * Calculate marker position from playback time
-         * VAM Algorithm: calculate_position_from_playback (same as demo)
+         * (Same as demo: calculateMarkerPositionFromTime)
          */
         _calculatePositionFromTime(time) {
             if (this.state.totalCells === 0 || this.secondsPerCell <= 0) {
@@ -790,10 +805,10 @@
             col = Math.max(0, Math.min(col, this.columns - 1));
             const colFraction = Math.max(0, Math.min(positionInRow - col, 1));
 
-            // X position: col cells + col gaps + fraction within current cell
+            // X position: col cells + col gaps (gap only between cells, not after last)
             const x = col * this.state.cellWidth + col * gap + colFraction * this.state.cellWidth;
 
-            // Y position: row cells + row gaps, centered in cell (cellHeight / 2)
+            // Y position: row cells + row gaps, centered in cell
             const y = row * this.state.cellHeight + row * gap + this.state.cellHeight / 2;
 
             return {
@@ -804,10 +819,10 @@
 
         /**
          * Calculate timestamp from marker position
-         * VAM Algorithm: calculate_x_continuous_timestamp (same as demo)
+         * (Same as demo: calculateTimeFromPosition)
          */
         _calculateTimeFromPosition(x, y) {
-            // Account for gap between cells (same as demo)
+            // Account for gap between cells
             const gap = this.state.gridGap || 2;
             const cellPlusGapY = this.state.cellHeight + gap;
 
