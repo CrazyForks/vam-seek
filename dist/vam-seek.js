@@ -1,7 +1,7 @@
 /**
  * VAM Seek - 2D Video Seek Marker Library
  *
- * @version 1.1.1
+ * @version 1.1.2
  * @license MIT
  * @author VAM Project
  *
@@ -264,6 +264,12 @@
             // Store current video URL (like demo's STATE.currentVideoUrl)
             this.state.currentVideoUrl = this.video.src;
 
+            // Set current video in LRU cache (like demo's frameCache.setCurrentVideo)
+            // This ensures cache is properly initialized for the current video
+            if (!this.frameCache.hasVideo(this.state.currentVideoUrl)) {
+                this.frameCache._getOrCreateCache(this.state.currentVideoUrl);
+            }
+
             this._calculateGridSize();
             this._renderGrid();
 
@@ -498,17 +504,24 @@
                 // Check if task was cancelled
                 if (!isTaskValid()) return;
 
-                // Create extractor video (assign directly to state like demo)
-                this.state.extractorVideo = await this._createExtractorVideo(targetVideoUrl);
+                // Create extractor video using local variable first
+                // to prevent race condition when rebuild() is called during creation
+                const extractorVideo = await this._createExtractorVideo(targetVideoUrl);
 
-                // Check again after async operation (same pattern as demo)
-                if (!isTaskValid() || !this.state.extractorVideo) {
-                    if (this.state.extractorVideo) {
-                        this.state.extractorVideo.remove();
-                        this.state.extractorVideo = null;
+                // Check if task was cancelled during video creation
+                if (!isTaskValid()) {
+                    if (extractorVideo) {
+                        extractorVideo.pause();
+                        extractorVideo.src = '';
+                        extractorVideo.remove();
                     }
                     return;
                 }
+
+                // Only assign to state if task is still valid
+                this.state.extractorVideo = extractorVideo;
+
+                if (!this.state.extractorVideo) return;
 
                 for (let i = 0; i < this.state.totalCells; i++) {
                     // Check if task was cancelled (cache is preserved)
@@ -1005,7 +1018,7 @@
         /**
          * Library version
          */
-        version: '1.1.1'
+        version: '1.1.2'
     };
 
 })(typeof window !== 'undefined' ? window : this);
