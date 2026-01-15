@@ -69,7 +69,8 @@ vam.destroy();                // Clean up
 ## Features
 
 - Client-side frame extraction (Canvas API, no server)
-- Multi-video LRU cache (3 videos, 200 frames each)
+- Multi-video LRU cache (5 videos, unlimited frames)
+- Blob URL thumbnails (memory efficient)
 - 60fps marker animation
 - No globals, multiple instances, clean destroy
 
@@ -130,6 +131,12 @@ Even at 36KB, it remains **ultra-lightweight**. This is the balance between "min
 For commercial licensing inquiries: haasiy@gmail.com
 
 ## Development History
+
+### 2026-01-16: v1.3.0
+- Expanded cache: 5 videos, unlimited frames per video
+- Blob URL thumbnails (reduced memory usage)
+- Canvas reuse for faster frame extraction
+- Parallel extraction support (`parallelExtractors` option)
 
 ### 2026-01-15: v1.2.x
 - Fixed race condition on settings change
