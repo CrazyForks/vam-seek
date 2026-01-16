@@ -161,6 +161,37 @@
 
         let vamInstance = null;
 
+        // Settings persistence
+        const STORAGE_KEY = 'vamSeekTestSettings';
+        const defaultSettings = {
+            columns: 3,
+            secondsPerCell: 15,
+            scrollBehavior: 'center'
+        };
+
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+            } catch (e) {
+                return defaultSettings;
+            }
+        }
+
+        function saveSettings(settings) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            } catch (e) {
+                console.warn('Failed to save settings:', e);
+            }
+        }
+
+        // Load and apply saved settings
+        const settings = loadSettings();
+        columnsSelect.value = settings.columns;
+        intervalSelect.value = settings.secondsPerCell;
+        scrollBehaviorSelect.value = settings.scrollBehavior;
+
         // File selection
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -215,27 +246,29 @@
             cellInfo.textContent = `Cell: (${cell.col}, ${cell.row})`;
         });
 
-        // Settings change
+        // Settings change (with persistence)
         columnsSelect.addEventListener('change', () => {
+            settings.columns = parseInt(columnsSelect.value);
+            saveSettings(settings);
             if (vamInstance) {
-                vamInstance.configure({
-                    columns: parseInt(columnsSelect.value)
-                });
+                vamInstance.configure({ columns: settings.columns });
             }
         });
 
         intervalSelect.addEventListener('change', () => {
+            settings.secondsPerCell = parseInt(intervalSelect.value);
+            saveSettings(settings);
             if (vamInstance) {
-                vamInstance.configure({
-                    secondsPerCell: parseInt(intervalSelect.value)
-                });
+                vamInstance.configure({ secondsPerCell: settings.secondsPerCell });
             }
         });
 
         scrollBehaviorSelect.addEventListener('change', () => {
+            settings.scrollBehavior = scrollBehaviorSelect.value;
+            saveSettings(settings);
             if (vamInstance) {
-                vamInstance.setScrollMode(scrollBehaviorSelect.value);
-                statusText.textContent = `Scroll: ${scrollBehaviorSelect.value}`;
+                vamInstance.setScrollMode(settings.scrollBehavior);
+                statusText.textContent = `Scroll: ${settings.scrollBehavior}`;
             }
         });
 
