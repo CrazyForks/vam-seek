@@ -108,7 +108,7 @@ Wait, didn't I say 15KB before? Yes, I did. As a developer, I was obsessed with 
 I chose to **trade those bytes for a significantly better user experience**:
 
 ### Multi-Video LRU Cache
-VAM Seek now "remembers" thumbnail grids for up to 3 videos. Switch back to a video you've seen, and the grid appears instantly. No re-extraction, no waiting.
+VAM Seek now "remembers" thumbnail grids for up to 5 videos. Switch back to a video you've seen, and the grid appears instantly. No re-extraction, no waiting.
 
 ### Reliability & Stability
 I've crushed several bugs discovered during the initial surge. The code now handles various video formats and edge cases gracefully.
@@ -143,7 +143,7 @@ For commercial licensing inquiries: haasiy@gmail.com
 - Added test page - [Try it](https://haasiy.main.jp/vam_web/html/test.html)
 
 ### 2026-01-13: Multi-Video Support
-- LRU cache for up to 3 videos
+- LRU cache for up to 5 videos
 - Per-video grid settings persistence
 
 ### 2026-01-10: Initial Release
