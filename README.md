@@ -130,34 +130,17 @@ Even at 43KB, it remains **ultra-lightweight**. This is the balance between "min
 
 For commercial licensing inquiries: haasiy@gmail.com
 
-## Development History
+## Changelog
 
-### 2026-01-18: v1.3.4
-- Fixed scroll oscillation when switching videos (proper cleanup of event listeners in `destroy()`)
-- Fixed center-scroll oscillation during playback (`_scrollToMarker` uses current position)
+### v1.3 (2026-01-18)
+- Multi-video LRU cache (5 videos, unlimited frames)
+- Mobile touch support
+- Auto-scroll modes (center/edge/off)
 
-### 2026-01-17: v1.3.1
-- Faster 2nd video loading (deferred ExtractorVideo cleanup)
-- Mobile video playback fix (touch event target filtering)
-- Autoscroll mode switching fix (`setScrollMode()` API)
-
-### 2026-01-16: v1.3.0
-- Expanded cache: 5 videos, unlimited frames per video
-- Blob URL thumbnails (reduced memory usage)
-- Canvas reuse for faster frame extraction
-- Parallel extraction support (`parallelExtractors` option)
-
-### 2026-01-15: v1.2.x
-- Fixed race condition on settings change
-- Added test page - [Try it](https://haasiy.main.jp/vam_web/html/test.html)
-
-### 2026-01-13: Multi-Video Support
-- LRU cache for up to 5 videos
-- Per-video grid settings persistence
-
-### 2026-01-10: Initial Release
+### v1.0 (2026-01-10)
+- Initial release
 - Client-side frame extraction
-- VAM algorithm for 2D timestamp calculation
+- 2D grid navigation
 
 ## Examples
 
