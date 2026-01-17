@@ -132,7 +132,9 @@ For commercial licensing inquiries: haasiy@gmail.com
 
 ## Changelog
 
-### v1.3 (2026-01-18)
+**Current: v1.3.4**
+
+### v1.3.x (2026-01-18)
 - Multi-video LRU cache (5 videos, unlimited frames)
 - Mobile touch support
 - Auto-scroll modes (center/edge/off)
