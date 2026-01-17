@@ -201,12 +201,6 @@
             padding: 8px 4px;
         }
 
-        .grid-panel.collapsed .grid-title {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            margin-top: 8px;
-        }
-
         .grid-header {
             padding: 8px 12px;
             background: var(--bg-tertiary);
@@ -330,32 +324,6 @@
             height: 100%;
         }
 
-        /* Info Footer (fixed at bottom of grid panel) */
-        .info-footer {
-            flex: 0 0 auto;
-            background: var(--bg-tertiary);
-            border-top: 1px solid var(--border-color);
-            padding: 8px 12px;
-            font-size: 12px;
-            font-family: 'Consolas', monospace;
-            display: none;
-        }
-
-        .info-footer.visible {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .info-label { color: var(--text-dim); }
-        .info-value { color: var(--highlight); font-weight: bold; }
-
         /* Loading */
         .loading-overlay {
             position: absolute;
@@ -457,7 +425,6 @@
         <div class="grid-panel" id="gridPanel">
             <div class="grid-header">
                 <button type="button" class="grid-toggle" id="gridToggle" title="Toggle Grid Panel" tabindex="-1">◀</button>
-                <span class="grid-title">Grid</span>
                 <div class="grid-settings">
                     <span class="grid-label">Col</span>
                     <select class="grid-select" id="columnsSelect" tabindex="-1">
@@ -496,16 +463,6 @@
                 <div class="loading-overlay" id="loadingOverlay">
                     <div class="spinner"></div>
                     <div id="loadingText">Extracting frames...</div>
-                </div>
-            </div>
-            <div class="info-footer" id="infoFooter">
-                <div class="info-item">
-                    <span class="info-label">Time:</span>
-                    <span class="info-value" id="overlayTime">00:00.00</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Cell:</span>
-                    <span class="info-value" id="overlayCell">(0, 0)</span>
                 </div>
             </div>
         </div>
@@ -636,9 +593,6 @@
             gridContainer: $('gridContainer'),
             thumbnailGrid: $('thumbnailGrid'),
             svgMarker: $('svgMarker'),
-            infoFooter: $('infoFooter'),
-            overlayTime: $('overlayTime'),
-            overlayCell: $('overlayCell'),
             loadingOverlay: $('loadingOverlay'),
             loadingText: $('loadingText'),
             gridPanel: $('gridPanel'),
@@ -806,7 +760,6 @@
             requestAnimationFrame(() => {
                 updateGridDimensions();
                 initializeMarker();
-                elements.infoFooter.classList.add('visible');
                 // [2025-01-13] requestAnimationFrame後も確実にスクロール位置をリセット
                 elements.gridContainer.scrollTop = 0;
                 extractAllFrames();
@@ -1187,7 +1140,6 @@
             // Set time to cell center (add 0.5 cell) so marker stays centered after timeupdate
             const time = (row * CONFIG.columns + col + 0.5) * CONFIG.secondsPerCell;
             elements.videoPlayer.currentTime = Math.min(time, CONFIG.videoDuration);
-            updateDisplay();
             scrollToMarker();
 
             // Reset manual move flag after a short delay
@@ -1261,16 +1213,6 @@
             }
 
             scrollAnimationId = requestAnimationFrame(animate);
-        }
-
-        // ==================================================
-        // Display Update
-        // ==================================================
-
-        function updateDisplay() {
-            const time = elements.videoPlayer.currentTime;
-            elements.overlayTime.textContent = formatTime(time);
-            elements.overlayCell.textContent = `(${STATE.currentCellX}, ${STATE.currentCellY})`;
         }
 
         function formatTime(seconds) {
@@ -1348,7 +1290,6 @@
                     if (!elements.videoPlayer.paused && !STATE.isDragging && !STATE.manualMarkerMove && STATE.totalCells > 0) {
                         const pos = calculateMarkerPositionFromTime(elements.videoPlayer.currentTime);
                         moveMarkerTo(pos.x, pos.y, true);
-                        updateDisplay();
                     }
                 }, 16);
             }
@@ -1514,8 +1455,6 @@
             const gap = STATE.gridGap || 2;
             STATE.currentCellX = Math.floor(clampedX / (STATE.cellWidth + gap));
             STATE.currentCellY = Math.floor((clampedY - STATE.cellHeight / 2 + (STATE.cellHeight + gap) / 2) / (STATE.cellHeight + gap));
-
-            updateDisplay();
         }
 
         // ==================================================
