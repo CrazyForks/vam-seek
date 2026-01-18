@@ -146,8 +146,7 @@ For commercial licensing inquiries: haasiy@gmail.com
 
 ## Examples
 
-- [Electron Desktop App](https://github.com/unhaya/vam-seek-electron-demo) - Full desktop video player with folder tree view
-  - **Now with AI video analysis** - Ask Claude about your videos using the thumbnail grid. One image, one API call, full video context.
+- [VAM Seek × AI](https://github.com/unhaya/vam-seek-electron-demo) - Electron desktop app with Claude Vision integration. One grid image, one API call, full video understanding.
 
 ## Credits
 
