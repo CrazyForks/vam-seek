@@ -138,6 +138,7 @@ For commercial licensing inquiries: haasiy@gmail.com
 - Multi-video LRU cache (5 videos, unlimited frames)
 - Mobile touch support
 - Auto-scroll modes (center/edge/off)
+- Added minified version: `vam-seek.min.js` (~20KB)
 
 ### v1.0 (2026-01-10)
 - Initial release
@@ -152,7 +153,7 @@ https://github.com/user-attachments/assets/77fb3661-4667-47d6-a4f1-3bae18653c51
 
 ## Credits
 
-Built and maintained by the creator of [VAM Desktop](https://github.com/unhaya/VAM-original).
+Evolved from [VAM Desktop](https://github.com/unhaya/VAM-original).
 
 ## Media Coverage
 
