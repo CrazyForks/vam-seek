@@ -146,7 +146,7 @@ For commercial licensing inquiries: haasiy@gmail.com
 
 ## Examples
 
-- [VAM Seek × AI](https://github.com/unhaya/vam-seek-ai) - Chat with AI about your video. Ask "When does the red car appear?" and get the exact timestamp. The grid becomes AI's eyes. *Experimental*
+- [VAM Seek × AI](https://github.com/unhaya/vam-seek-ai) - Give AI "Eyes" with Vamseek. Chat with AI about your video. Ask "When does the red car appear?" and get the exact timestamp. The grid becomes AI's eyes. *Experimental*
 
 ## Credits
 
