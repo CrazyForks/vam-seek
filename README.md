@@ -150,7 +150,9 @@ For commercial licensing inquiries: haasiy@gmail.com
 
 ## VAM-RGB: Temporal Encoding for AI
 
-**NEW:** VAM-RGB is a temporal encoding technique that packs 3 moments into a single image:
+VAM-RGB packs 3 moments into a single image:
+
+![VAM-RGB Sample](docs/vam-rgb-sample.jpg)
 
 | Channel | Time | Meaning |
 |---------|------|---------|
@@ -158,11 +160,12 @@ For commercial licensing inquiries: haasiy@gmail.com
 | G (Green) | T0 | Present |
 | B (Blue) | T+0.5s | Future |
 
-**How it works:** Motion appears as "chromatic aberration" (color fringing). Static objects remain grayscale. Moving objects show RGB separation proportional to speed and direction.
+Motion appears as chromatic aberration. Static objects remain grayscale. Moving objects show RGB separation proportional to speed and direction.
 
-**Why it matters:** AI perceives temporal flow from a single image—no video streaming required. This enables motion vector inference without explicit optical flow computation.
+AI perceives temporal flow from a single image—no video streaming required.
 
-See [VAM Seek AI](https://github.com/unhaya/vam-seek-ai) for implementation.
+- [VAM Seek AI](https://github.com/unhaya/vam-seek-ai) - Implementation
+- [VAM-RGB Defensive Publication (Zenodo)](https://zenodo.org/records/18338870) - Technical specification
 
 ## Credits
 
